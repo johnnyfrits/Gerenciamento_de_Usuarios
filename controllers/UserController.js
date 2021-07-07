@@ -14,9 +14,97 @@ class UserController {
 
             event.preventDefault();
 
-            this.addLine(this.getValues());
+            let btn = this.formEl.querySelector("[type=submit]");
+
+            btn.disable = true;
+
+            let values = this.getValues();
+
+            this.getPhoto().then(
+
+                (content) => {
+
+                    values.photo = content;
+
+                    this.addLine(values);
+
+                    this.formEl.reset();
+
+                    btn.disable = false;
+                },
+                (e) => {
+
+                    console.log(e);
+
+                    btn.disable = true;
+                }
+            );
+
+            // this.getPhoto((content) => {
+
+            //     values.photo = content;
+
+            //     this.addLine(values);
+            // });
         });
     }
+
+    getPhoto() {
+
+        return new Promise((resolve, reject) => {
+
+            let fileReader = new FileReader();
+
+            let elements = [...this.formEl.elements].filter(item => {
+
+                if (item.name === "photo") {
+                    return item;
+                }
+            })
+
+            let file = elements[0].files[0];
+
+            fileReader.onload = () => {
+
+                resolve(fileReader.result);
+            };
+
+            fileReader.onerror = (e) => {
+
+                reject(e);
+            };
+
+            if (file) {
+
+                fileReader.readAsDataURL(file);
+            } else {
+
+                resolve('dist/img/boxed-bg.jpg');
+            }
+        });
+    }
+
+    // Exemplo de callback
+    // getPhoto(callback) {
+
+    //     let fileReader = new FileReader();
+
+    //     let elements = [...this.formEl.elements].filter(item => {
+
+    //         if (item.name === "photo") {
+    //             return item;
+    //         }
+    //     })
+
+    //     let file = elements[0].files[0];
+
+    //     fileReader.onload = () => {
+
+    //         callback(fileReader.result);
+    //     };
+
+    //     fileReader.readAsDataURL(file);
+    // }
 
     getValues() {
 
@@ -56,7 +144,7 @@ class UserController {
 
         this.tableEl.innerHTML += `
         <tr>
-            <td><img src="dist/img/user1-128x128.jpg" alt="User Image" class="img-circle img-sm"></td>
+            <td><img src=${dataUser.photo} alt="User Image" class="img-circle img-sm"></td>
             <td>${dataUser.name}</td>
             <td>${dataUser.email}</td>
             <td>${dataUser.admin ? "Sim" : "Não"}</td>
